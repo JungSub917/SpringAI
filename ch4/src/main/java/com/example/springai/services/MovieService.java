@@ -1,5 +1,7 @@
 package com.example.springai.services;
 
+import com.example.springai.model.Movie;
+
 import java.util.List;
 
 public interface MovieService {

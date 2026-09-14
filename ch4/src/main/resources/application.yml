@@ -4,8 +4,11 @@ spring:
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
-
       chat:
         model: gpt-4o-mini
         temperature: 1.2
         max-tokens: 500
+
+logging:
+  pattern:
+    console: '${LOGPATTERN_CONSOLE:%green(%d{HH:mm:ss:sss}) %blue(%-5level) %red([%thread]) %yellow(%logger{15}) = %msg%n}'

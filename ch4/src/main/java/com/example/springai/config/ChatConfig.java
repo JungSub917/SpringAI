@@ -10,13 +10,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ChatConfig {
 
-    @Bean
-    public ChatMemory chatMemory() {
-        return null;
-    }
+//    @Bean
+//    public ChatMemory chatMemory() {
+//        return null;
+//    }
 
     @Bean
     public ChatClient memoryChatClient(ChatClient.Builder builder, ChatMemory chatMemory) {
-        return null;
+
+        return builder.build();
+
     }
 }
