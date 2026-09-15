@@ -15,16 +15,21 @@ public class MemoryChatController {
         this.memoryChatService = memoryChatService;
     }
 
+    /*
+     *  POST /api/chat/ahn      body: "제 이름은 ahn 입니다."
+     *  POST /api/chat/ahn      body: "제 이름이 뭐라고 했죠?"
+     */
     @PostMapping("/{conversationId}")
     public String chat(@PathVariable String conversationId,
                        @RequestBody String message) {
-        return null;
+        return memoryChatService.chat(conversationId, message);
     }
 
     @GetMapping(value = "/{conversationId}/stream",
             produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> stream(@PathVariable String conversationId,
                                @RequestParam String message) {
-        return null;
+
+        return memoryChatService.chatStream(conversationId, message);
     }
 }
