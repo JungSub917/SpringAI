@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: spring-ai-prompts
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        model: gpt-4o-mini
+        temperature: 0.3
+
+logging:
+  level:
+    com.example.prompts: DEBUG
