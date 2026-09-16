@@ -24,8 +24,15 @@ public class TravelService {
 
     /** ── 슬라이드 코드 그대로 ────────────────────────────────── */
     public String recommend(String question) {
+        PromptTemplate template = new PromptTemplate("당신은 {role}입니다 \n"
+                                                    + "아래 질문에 {format}형식으로 답하세요. \n\n"
+                                                    + "질문:{question}");
 
-        return null;
+        String answer = chatClient.prompt(template.create(Map.of("role", "여행 전문가", "format", "번호 목록 3개", "question", question)))
+                                  .call()
+                                  .content();
+
+        return answer;
     }
 
     /**
@@ -34,13 +41,27 @@ public class TravelService {
      * 위 템플릿 버전으로 넘어간다.
      */
     public String recommendByConcat(String role, String format, String question) {
+        String prompt = "당신은" + role + "입니다 \n"
+                      + "아래 질문에 " + format + "형식으로 답하세요. \n\n"
+                      + "질문:" + question;
 
-        return null;
+        return chatClient.prompt()
+                         .user(prompt)
+                         .call()
+                         .content();
     }
 
     /** 역할·형식을 바꿔가며 템플릿의 재사용성을 확인 */
     public String recommendCustom(String role, String format, String question) {
 
-        return null;
+        PromptTemplate template = new PromptTemplate("당신은 {role}입니다 \n"
+                                + "아래 질문에 {format}형식으로 답하세요. \n\n"
+                                + "질문:{question}");
+
+        String answer = chatClient.prompt(template.create(Map.of("role", role, "format", format, "question", question)))
+                .call()
+                .content();
+
+        return answer;
     }
 }

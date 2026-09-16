@@ -43,7 +43,9 @@ public class PromptQualityController {
     public Map<String, String> customerCenter(
             @RequestParam(defaultValue = "OO쇼핑") String company,
             @RequestParam(defaultValue = "주문한 상품을 개봉했는데 환불이 되나요?") String question) {
-        return null;
+        return Map.of("company",    company,
+                      "question",   question,
+                      "answer",     service.customerCenterBot(company, question));
     }
 
     /** 제약(하지 말 것)의 효과: 정책에 없는 질문을 넣어 본다 */
@@ -51,6 +53,8 @@ public class PromptQualityController {
     public Map<String, String> outOfPolicy(
             @RequestParam(defaultValue = "OO쇼핑") String company,
             @RequestParam(defaultValue = "이 회사 주가 전망이 어떤가요?") String question) {
-        return null;
+        return Map.of("question",   question,
+                      "answer",     service.customerCenterBot(company, question),
+                      "기대 동작",    "'상단원 연결을 도와드리겠습니다' 로 답해야 정상");
     }
 }

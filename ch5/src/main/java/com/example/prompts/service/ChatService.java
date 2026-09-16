@@ -19,6 +19,7 @@ import java.util.Map;
 @Service
 public class ChatService {
 
+    @Value("classpath:/prompts/system.st")
     private Resource systemResource;
 
     private final ChatClient chatClient;
@@ -32,7 +33,10 @@ public class ChatService {
      * 이 경우 파일 안의 {service} 자리는 치환되지 않고 그대로 전달된다는 점을 시연에서 짚어준다.
      */
     public String ask(String question) {
-        return null;
+        return chatClient.prompt()
+                .system(systemResource)
+                .user(question)
+                .call().content();
     }
 
     /**
@@ -40,7 +44,12 @@ public class ChatService {
      * PromptTemplate과 외부 파일 관리를 결합한 형태로, 실무에서 쓰는 조합이다.
      */
     public String ask(String service, String question) {
-        return null;
+        String systemText = new PromptTemplate(systemResource).render(Map.of("service", service));
+
+        return chatClient.prompt()
+                .system(systemText)
+                .user(question)
+                .call().content();
     }
 
     /** 현재 로딩된 프롬프트 파일 원문 확인 — "프롬프트도 리뷰 대상"임을 보여주는 용도 */
