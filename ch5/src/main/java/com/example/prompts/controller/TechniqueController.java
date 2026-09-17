@@ -26,21 +26,21 @@ public class TechniqueController {
     @GetMapping("/zero-shot")
     public Map<String, String> zeroShot(
             @RequestParam(defaultValue = "가격 대비 성능은 괜찮은데 배터리가 하루도 못 갑니다") String review) {
-        return null;
+        return Map.of("review", review, "answer", sentimentService.zeroShot(review));
     }
 
     /** Few-shot — 한 단어 출력으로 수렴 */
     @GetMapping("/few-shot")
     public Map<String, String> fewShot(
             @RequestParam(defaultValue = "가격 대비 성능은 괜찮은데 배터리가 하루도 못 갑니다") String review) {
-        return null;
+        return Map.of("review", review, "answer", sentimentService.fewShot(review));
     }
 
     /** 나란히 비교 — "예시가 곧 사양(Spec)" */
     @GetMapping("/shot/compare")
     public BeforeAfterResponse shotCompare(
             @RequestParam(defaultValue = "가격 대비 성능은 괜찮은데 배터리가 하루도 못 갑니다") String review) {
-        return null;
+        return sentimentService.compare(review);
     }
 
     /** CoT 유/무 비교 — 조건 3개 이상이 얽힌 판단 */
