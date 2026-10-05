@@ -28,6 +28,34 @@ public class ChunkingDemo {
         System.out.println("=== 데모 (2) 청킹 비교 ===\n");
 
        // chunking
+        List<Document> source = new TextReader(policyDoc).get();    // source = 1
+        int totalChars = source.stream().mapToInt(d -> d.getText().length()).sum();
+
+        System.out.printf("원본 문서: %d건, 총 %,d자%n%n", source.size(), totalChars);
+
+        for (int chunkSize : new int[]{200, 500, 1000}){
+            TokenTextSplitter splitter = TokenTextSplitter.builder()
+                    .withChunkSize(chunkSize)           // 기본 텍스트 분한 토큰 크기
+                    .withMinChunkSizeChars(100)         // 최소 문자 단위 크기
+                    .withMinChunkLengthToEmbed(5)       // 임베딩한 최소 길이
+                    .withMaxNumChunks(10000)            // 최대 생성 가능 청크 수
+                    .withKeepSeparator(true)            // 구분자 유지 여부
+                    .build();
+
+            List<Document> chunks = splitter.apply(source);
+
+            double avgLen = chunks.stream().mapToInt(d -> d.getText().length()).average().orElse(0);
+            System.out.printf("[청크 크기 %4d 토큰] -> %2d개 청크, 평균 %,.0f자 %n", chunkSize, chunks.size(), avgLen);
+            System.out.println("    첫 청크 미리보기");
+            System.out.println("    " + preview(chunks.get(0).getText()));
+
+            if(chunks.size() > 1){
+                System.out.println("    두번째 청크 미리보기");
+                System.out.println("    " + preview(chunks.get(1).getText()));
+            }
+
+            System.out.println();
+        }
 
         System.out.println("""
                 [관찰 포인트]
