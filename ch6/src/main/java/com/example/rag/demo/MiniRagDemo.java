@@ -45,6 +45,22 @@ public class MiniRagDemo {
         // ---------- 1. 적재 ----------
         System.out.println("[1/3] 적재 중...");
         /* 구현 */
+        TextReader reader = new TextReader(policyDoc);
+        reader.getCustomMetadata().put("source", "company-policy.txt");
+        List<Document> docs = reader.read();
+
+        TokenTextSplitter splitter = TokenTextSplitter.builder()
+                .withChunkSize(400)                 // 기본 텍스트 분한 토큰 크기
+                .withMinChunkSizeChars(100)         // 최소 문자 단위 크기
+                .withMinChunkLengthToEmbed(5)       // 임베딩한 최소 길이
+                .withMaxNumChunks(10000)            // 최대 생성 가능 청크 수
+                .withKeepSeparator(true)            // 구분자 유지 여부
+                .build();
+
+        List<Document> chunks = splitter.apply(docs);
+        VectorStore vectorStore = SimpleVectorStore.builder(embeddingModel).build();
+        vectorStore.add(chunks);
+        System.out.printf("          원본 %d건 -> 청크 %d건 적재 완료 %n%n", docs.size(), chunks.size());
 
         String question = "연차 휴가는 며칠이고 언제까지 사용해야 하나요?";
 
@@ -52,15 +68,35 @@ public class MiniRagDemo {
         System.out.println("[2/3] 유사도 검색 (LLM 호출 전 - 근거 확인)");
         System.out.println("      질문: " + question);
         /* 구현 */
-        System.out.println();
+        List<Document> found = vectorStore.similaritySearch(SearchRequest.builder().query(question).topK(3).build());
+
+        for(int i = 0; i < found.size(); i++) {
+            Document d = found.get(i);
+            System.out.printf("      근거 %d) [%s] %s%n", i+1, d.getMetadata().getOrDefault("source", "-"), preview(d.getText()));
+
+        }
 
         // ---------- 3. 생성 ----------
         System.out.println("[3/3] 근거를 주입해 답변 생성");
         /* 구현 */
+        String context = found.stream().map(Document::getText).collect(Collectors.joining("\n---\n"));
 
-        String withRag = "";
+        String withRag = chatClient.prompt()
+                                .system("""
+                                        너는 사내 규정 안내 도우미 입니다.
+                                        아래 [근거]에 있는 내용만 사용해서 한국어로 간결하게 답하세요.
+                                        근거에 없으면 "제공된 문서에서 확인할 수 없습니다"라고 답하세요.
+                                        """)
+                                .user(u -> u.text("[근거]\n{ctx}\n\n[질문]\n{q}")
+                                        .param("ctx", context)
+                                        .param("q", question))
+                                .call()
+                                .content();
 
-        String withoutRag = "";
+        String withoutRag = chatClient.prompt()
+                                .user(question)
+                                .call()
+                                .content();
 
         System.out.println("\n--- RAG 적용 답변 ---");
         System.out.println(withRag);
